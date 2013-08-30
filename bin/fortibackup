@@ -1,0 +1,61 @@
+#!/bin/env ruby
+
+require 'net/scp'
+require 'getoptlong'
+require 'highline/import'
+
+opts = GetoptLong.new(
+  [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
+  [ '--host', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--login', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--pass', GetoptLong::OPTIONAL_ARGUMENT ]
+)
+
+host = nil
+login = nil
+password = nil
+
+opts.each do |opt, arg|
+  case opt
+    when '--help'
+      puts <<-EOF
+fortibackup [OPTION] ... DIR
+
+-h, --help:
+   show help
+
+--host name:
+
+--login login:
+
+--pass password:
+
+      EOF
+
+    when '--host'
+      host = arg
+    when '--login'
+      login = arg
+    when '--pass'
+      password = arg
+  end
+end
+
+if host == nil || login == nil
+  puts "Missing arguments (try --help)"
+  exit 0
+end
+
+if password == nil
+  password = ask("Enter password for user #{login}: ") { |q| q.echo = "*" }
+end
+
+puts "==> Backing up #{host}"
+    Net::SCP.start(host, login, :password => password) do |scp|
+      scp.download!('sys_config', '/tmp') do |c,n,r,t|
+        pct = r / t.to_f
+        cnt = ( 72 * pct ).ceil
+        print "%-72s %.2f%%\r" % [ ("#" * cnt), ( pct * 100 ) ]
+      end
+      puts 
+    end
