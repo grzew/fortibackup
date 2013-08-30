@@ -1,5 +1,14 @@
 #!/bin/env ruby
 
+#####################################
+#                                   #
+#    Grzegorz 'grzew' Wieczorek     #
+#                                   #
+# Atuomatic fortigate backup script #
+#                                   #
+#####################################
+
+
 require 'net/scp'
 require 'getoptlong'
 require 'highline/import'
